@@ -1,5 +1,14 @@
-from vpython import *
+from skinematics.sensors.xsens import XSens
 
+data = XSens("data_xsens.txt")
+length = data.totalSamples
+hz = data.rate
+quat = data.quat
+print("hz :%s", hz)
+print("length :%s", length)
+
+
+from vpython import *
 drag = False
 def down(ev):
     global drag
@@ -41,3 +50,17 @@ Objbox = box(pos=vector(0,-0.4,0), axis=vector(5,0,0), length=5, height=0.2, wid
 
 ObjIMU = compound([Objarrow, Objbox])
 ObjIMU.axis = vector(1,0,0)
+ObjIMU.pos = vector(0,0,0)
+
+for i in range(length) :
+    rate(hz)
+    ObjIMU.rotate(angle=quat[i][3], axis=vector(quat[i][0], quat[i][1], quat[i][2]), origin=vector(0,0,0))
+
+
+
+
+
+
+
+
+
