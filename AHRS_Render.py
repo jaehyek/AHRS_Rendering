@@ -1,11 +1,38 @@
-from skinematics.sensors.xsens import XSens
+# from skinematics.sensors.xsens import XSens
+#
+# data = XSens("data_xsens.txt")
+# length = data.totalSamples
+# hz = data.rate
+# quat = data.quat
+# print("hz :%s" %hz)
+# print("length :%s"% length)
 
-data = XSens("data_xsens.txt")
-length = data.totalSamples
-hz = data.rate
-quat = data.quat
-print("hz :%s" %hz)
-print("length :%s"% length)
+import pandas as pd
+
+in_file = "data_xsens.txt"
+try:
+    fh = open(in_file)
+    fh.readline()
+    line = fh.readline()
+    hz = float(line.split(':')[1].split('H')[0])
+    fh.close()
+
+except FileNotFoundError:
+    print('{0} does not exist!'.format(in_file))
+    exit(0)
+
+# Read the data
+data = pd.read_csv(in_file,sep='\t',skiprows=4,index_col=False)
+
+# Extract the columns that you want, and pass them on
+
+acc=data.filter(regex='Acc').values
+gyr=data.filter(regex='Gyr').values
+mag=data.filter(regex='Mag').values
+quat=data.filter(regex='Quat').values
+
+length = len(acc)
+
 
 
 from vpython import *
@@ -52,10 +79,19 @@ ObjIMU = compound([Objarrow, Objbox])
 # ObjIMU.axis = vector(1,0,0)
 # ObjIMU.pos = vector(0,0,0)
 
-for i in range(length) :
-    rate(hz)
-    ObjIMU.rotate(angle=radians(quat[i][0]), axis=vector(quat[i][1], quat[i][2], quat[i][3]), origin=vector(0,0,0))
-    # ObjIMU.rotate(angle=radians(90), axis=vector(0,1,0), origin=vector(0, 0, 0))
+count = 0
+for loop in range(3) :
+    ObjIMU.axis = vector(5,0,0)
+    ObjIMU.pos = vector(0, 0, 0)
+    ObjIMU.up = vector(0, 5, 0)
+    sleep(2)
+    for i in range(length) :
+        rate(hz)
+        ObjIMU.rotate(angle=radians(quat[i][0]), axis=vector(quat[i][1], quat[i][2], quat[i][3]), origin=vector(0,0,0))
+        # ObjIMU.rotate(angle=radians(90), axis=vector(0,1,0), origin=vector(0, 0, 0))
+        count += 1
+        # if count == 40 :
+        #     break
 
 
 
